@@ -8,7 +8,9 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Convert Now",
-  description: "convert image formats",
+  description: "convert image formats to multiple formats fast and simple",
+  creator: "ledraa",
+  keywords: "image converter, converter, unlimited image converter",
 };
 
 export default function RootLayout({

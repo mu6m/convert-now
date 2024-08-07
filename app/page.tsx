@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import convert from "@/util/convert";
 import loadFFmpeg from "@/util/load-ffmpeg";
@@ -10,6 +10,16 @@ import { Loader2Icon } from "lucide-react";
 export default function Comp() {
   const [files, setFiles] = useState<any>([]);
   const [loading, setLoading] = useState(false);
+
+  const ffmpeg = useRef<any>(null);
+
+  const downloadFFmpeg = async () => {
+    ffmpeg.current = await loadFFmpeg();
+  };
+
+  useEffect(() => {
+    downloadFFmpeg();
+  }, []);
 
   return (
     <div className="bg-white shadow-xl rounded-lg flex flex-col items-center p-10 gap-4">
@@ -26,7 +36,7 @@ export default function Comp() {
           );
         })}
       </div>
-      {files.length > 0 && (
+      {files.length > 0 && ffmpeg.current != null && (
         <Button
           variant={"default"}
           className="max-w-xl w-full mx-auto mt-6"
@@ -34,9 +44,8 @@ export default function Comp() {
           onClick={async () => {
             setLoading(true);
             try {
-              const ffmpeg = await loadFFmpeg();
               for (const item of files) {
-                await convert(ffmpeg, item.file, item.format);
+                await convert(ffmpeg.current, item.file, item.format);
               }
             } finally {
               setLoading(false);
