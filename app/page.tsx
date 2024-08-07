@@ -8,6 +8,9 @@ import {
   FileInput,
 } from "@/components/file-upload";
 import { Paperclip } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import convert, { IMAGE_EXTENSIONS } from "@/util/convert";
+import loadFFmpeg from "@/util/load-ffmpeg";
 
 const FileSvgDraw = () => {
   return (
@@ -32,43 +35,65 @@ const FileSvgDraw = () => {
         &nbsp; or drag and drop
       </p>
       <p className="text-xs text-gray-500 dark:text-gray-400">
-        SVG, PNG, JPG or GIF
+        accepts images only
       </p>
     </>
   );
 };
 
 export default function FileUploaderTest() {
-  const [files, setFiles] = useState<File[] | null>(null);
+  const [files, setFiles] = useState<any | null>(null);
 
   const dropZoneConfig = {
-    maxFiles: 5,
-    maxSize: 1024 * 1024 * 4,
+    maxFiles: 100,
+    maxSize: 1024 * 1024 * 20,
     multiple: true,
+    accept: {
+      "image/*": IMAGE_EXTENSIONS,
+    },
   };
-
+  console.log(files);
   return (
     <FileUploader
       value={files}
       onValueChange={setFiles}
       dropzoneOptions={dropZoneConfig}
-      className="relative bg-background rounded-lg p-2"
+      className="bg-white rounded-lg p-6 shadow-xl"
     >
-      <FileInput className="outline-dashed outline-1 outline-white">
+      <FileInput className="outline-dashed outline-1 outline-slate-600 shadow-md mb-8 mt-2">
         <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full ">
           <FileSvgDraw />
         </div>
       </FileInput>
-      <FileUploaderContent>
+      <FileUploaderContent className="flex flex-col gap-8">
         {files &&
           files.length > 0 &&
-          files.map((file, i) => (
-            <FileUploaderItem key={i} index={i}>
+          files.map((item: any, i: number) => (
+            <FileUploaderItem
+              files={files}
+              setFormat={setFiles}
+              key={item.file.name}
+              index={i}
+            >
               <Paperclip className="h-4 w-4 stroke-current" />
-              <span>{file.name}</span>
+              <span>{item.file.name}</span>
             </FileUploaderItem>
           ))}
       </FileUploaderContent>
+      {files && files.length > 0 && (
+        <Button
+          variant={"default"}
+          className="max-w-xl w-full mx-auto mt-6"
+          onClick={async () => {
+            const ffmpeg = await loadFFmpeg();
+            for (const item of files) {
+              await convert(ffmpeg, item.file, item.format);
+            }
+          }}
+        >
+          Convert
+        </Button>
+      )}
     </FileUploader>
   );
 }

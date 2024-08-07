@@ -21,7 +21,17 @@ import {
 } from "react-dropzone";
 import { toast } from "sonner";
 import { Trash2 as RemoveIcon } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectLabel,
+  SelectItem,
+} from "./ui/select";
+import { IMAGE_EXTENSIONS } from "@/util/convert";
 
 type DirectionOptions = "rtl" | "ltr" | undefined;
 
@@ -49,7 +59,7 @@ export const useFileUpload = () => {
 type FileUploaderProps = {
   value: File[] | null;
   reSelect?: boolean;
-  onValueChange: (value: File[] | null) => void;
+  onValueChange: (value: any | null) => void;
   dropzoneOptions: DropzoneOptions;
   orientation?: "horizontal" | "vertical";
 };
@@ -160,7 +170,7 @@ export const FileUploader = forwardRef<
           return;
         }
 
-        const newValues: File[] = value ? [...value] : [];
+        const newValues: any[] = value ? [...value] : [];
 
         if (reSelectAll) {
           newValues.splice(0, newValues.length);
@@ -168,7 +178,7 @@ export const FileUploader = forwardRef<
 
         files.forEach((file) => {
           if (newValues.length < maxFiles) {
-            newValues.push(file);
+            newValues.push({ file, format: accept[0] });
           }
         });
 
@@ -280,7 +290,11 @@ FileUploaderContent.displayName = "FileUploaderContent";
 
 export const FileUploaderItem = forwardRef<
   HTMLDivElement,
-  { index: number } & React.HTMLAttributes<HTMLDivElement>
+  {
+    index: number;
+    setFormat: any;
+    files: any;
+  } & React.HTMLAttributes<HTMLDivElement>
 >(({ className, index, children, ...props }, ref) => {
   const { removeFileFromSet, activeIndex, direction } = useFileUpload();
   const isSelected = index === activeIndex;
@@ -288,8 +302,7 @@ export const FileUploaderItem = forwardRef<
     <div
       ref={ref}
       className={cn(
-        buttonVariants({ variant: "ghost" }),
-        "h-6 p-1 justify-between cursor-pointer relative",
+        "p-1 justify-between cursor-pointer relative flex flex-col md:flex-row items-center ",
         className,
         isSelected ? "bg-muted" : ""
       )}
@@ -298,17 +311,35 @@ export const FileUploaderItem = forwardRef<
       <div className="font-medium leading-none tracking-tight flex items-center gap-1.5 h-full w-full">
         {children}
       </div>
-      <button
-        type="button"
-        className={cn(
-          "absolute",
-          direction === "rtl" ? "top-1 left-1" : "top-1 right-1"
-        )}
-        onClick={() => removeFileFromSet(index)}
-      >
-        <span className="sr-only">remove item {index}</span>
-        <RemoveIcon className="w-4 h-4 hover:stroke-destructive duration-200 ease-in-out" />
-      </button>
+      <div className=" flex flex-col justify-start items-start md:flex-row gap-4">
+        <Select onValueChange={() => {}}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Format" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Formats</SelectLabel>
+              {IMAGE_EXTENSIONS.map((item) => {
+                return (
+                  <SelectItem key={item} value={item}>
+                    {item}
+                  </SelectItem>
+                );
+              })}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        <Button
+          type="button"
+          className="w-10 h-10"
+          size={"icon"}
+          variant={"outline"}
+          onClick={() => removeFileFromSet(index)}
+        >
+          <span className="sr-only">remove item {index}</span>
+          <RemoveIcon className="w-4 h-4" />
+        </Button>
+      </div>
     </div>
   );
 });

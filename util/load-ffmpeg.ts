@@ -1,7 +1,7 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { toBlobURL } from "@ffmpeg/util";
 
-export default async function loadFfmpeg(): Promise<FFmpeg> {
+export default async function loadFFmpeg(): Promise<FFmpeg> {
   const ffmpeg = new FFmpeg();
   const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.2/dist/umd";
   await ffmpeg.load({
