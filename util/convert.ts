@@ -28,19 +28,18 @@ export default async function convert(
 
   await ffmpeg.exec(["-i", from, to]);
   const data = (await ffmpeg.readFile(to)) as Uint8Array;
-  console.log(data);
-  // const mimeType = lookup(format) || "application/octet-stream";
-  // const blob = new Blob([data], { type: mimeType });
-  // const url = URL.createObjectURL(blob);
+  const mimeType = lookup(format) || "application/octet-stream";
+  const blob = new Blob([data], { type: mimeType });
+  const url = URL.createObjectURL(blob);
 
-  // const a = document.createElement("a");
-  // a.style.display = "none";
-  // a.href = url;
-  // a.download = to;
+  const a = document.createElement("a");
+  a.style.display = "none";
+  a.href = url;
+  a.download = to;
 
-  // document.body.appendChild(a);
-  // a.click();
+  document.body.appendChild(a);
+  a.click();
 
-  // URL.revokeObjectURL(url);
-  // document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  document.body.removeChild(a);
 }
