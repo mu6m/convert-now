@@ -1,3 +1,3 @@
 # Convert Now
 
-a fast selfhosted file converted
+a fast selfhosted file converter to multiple formats fast and easy
