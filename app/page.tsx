@@ -50,6 +50,7 @@ export default function Comp() {
             } finally {
               setLoading(false);
             }
+            setFiles([]);
           }}
         >
           {loading ? (

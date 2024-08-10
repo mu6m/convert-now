@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { IMAGE_EXTENSIONS } from "@/util/convert";
+import { FILE_EXTENSIONS, findFileType } from "@/util/convert";
 import { Button } from "./ui/button";
 import {
   Select,
@@ -11,21 +11,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Trash2, Paperclip } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 const config = {
-  maxFiles: 20,
-  maxSize: 20 * 1024 * 1024,
+  maxFiles: 100,
+  maxSize: 20,
 };
 
 export function Fileupload({ setFiles }: any) {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = event.target.files;
     if (fileList) {
-      const newFiles = Array.from(fileList).map((file) => ({
-        file,
-        format: IMAGE_EXTENSIONS[0],
-      }));
+      const newFiles = Array.from(fileList).map((file: File) => {
+        const able = findFileType(
+          `.${file.name.split(".").pop()?.toLowerCase()}`
+        );
+        if (!able) {
+          return null;
+        }
+        return {
+          file,
+          format: able.extensions[0],
+          able: able.extensions,
+        };
+      });
       setFiles((prev: any) => [...prev, ...newFiles]);
     }
     event.target.value = "";
@@ -37,14 +46,14 @@ export function Fileupload({ setFiles }: any) {
         className="file:hidden"
         id="files"
         type="file"
-        accept={IMAGE_EXTENSIONS.join(",")}
+        accept={Object.values(FILE_EXTENSIONS).flat().join(",")}
         max={config.maxFiles}
-        size={config.maxSize}
+        size={config.maxSize * 1024 * 1024}
         onChange={handleFileChange}
         multiple
       />
       <p className="mt-1 text-sm text-gray-500" id="file_input_help">
-        Images only (MAX. 20MB)
+        {Object.keys(FILE_EXTENSIONS).join(", ")} only (MAX. {config.maxSize}MB)
       </p>
     </div>
   );
@@ -73,7 +82,7 @@ export function Fileitem({ item, setFiles, index }: any) {
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Formats</SelectLabel>
-              {IMAGE_EXTENSIONS.map((item) => {
+              {item.able.map((item: string) => {
                 return (
                   <SelectItem key={item} value={item}>
                     {item}
